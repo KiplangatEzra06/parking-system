@@ -30,7 +30,7 @@
                         <span>Live Parking</span>
                     </a>
                     <a href="#vehicle-forms" class="nav-item">
-                        <span class="icon">☑</span>
+                        <span class="icon">IN</span>
                         <span>Entries</span>
                     </a>
                     <a href="#revenue" class="nav-item">
@@ -57,7 +57,7 @@
                 </div>
 
                 <div class="header-meta">
-                    <div class="notification-bell">🔔</div>
+                    <div class="notification-bell">Notifications</div>
 
                     <div class="admin-box">
                         <span class="admin-avatar">AD</span>
@@ -86,7 +86,7 @@
 
             <section class="stats-grid">
                 <article class="stat-card blue">
-                    <div class="stat-icon">🚗</div>
+                    <div class="stat-icon">BAYS</div>
                     <div class="stat-value-block">
                         <h3>Total Bays</h3>
                         <strong>{{ total_slots }}</strong>
@@ -95,7 +95,7 @@
                 </article>
 
                 <article class="stat-card green">
-                    <div class="stat-icon">🚘</div>
+                    <div class="stat-icon">OPEN</div>
                     <div class="stat-value-block">
                         <h3>Available</h3>
                         <strong>{{ available_slots }}</strong>
@@ -104,7 +104,7 @@
                 </article>
 
                 <article class="stat-card red">
-                    <div class="stat-icon">🚕</div>
+                    <div class="stat-icon">IN USE</div>
                     <div class="stat-value-block">
                         <h3>Occupied</h3>
                         <strong>{{ occupied_slots }}</strong>
@@ -113,7 +113,7 @@
                 </article>
 
                 <article class="stat-card purple" id="revenue">
-                    <div class="stat-icon">💰</div>
+                    <div class="stat-icon">KSh</div>
                     <div class="stat-value-block">
                         <h3>Today's Revenue</h3>
                         <strong>KSh {{ '%.0f' % payments_collected_today }}</strong>
@@ -161,7 +161,7 @@
                             {% if recent_activity %}
                             {% for item in recent_activity %}
                             <li class="activity-item">
-                                <span class="activity-icon">{{ '🚗' if item.kind == 'entry' else '💳' }}</span>
+                                <span class="activity-icon">{{ 'IN' if item.kind == 'entry' else 'OUT' }}</span>
                                 <div>
                                     <div>{{ item.label }}</div>
                                     <small>{{ '18:32' if item.kind == 'entry' else '18:21' }}</small>
