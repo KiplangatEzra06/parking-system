@@ -79,7 +79,8 @@ def create_app(database_path: str = "parking.db", slot_count: int = 10):
 
         slot_rows = system.status()
         total_slots = len(slot_rows)
-        available_slots = system.available_slots
+        available_slots = sum(
+            slot["status"] == "Available" for slot in slot_rows)
         occupied_slots = total_slots - available_slots
         active_records = system.active_records()
         completed_records = system.completed_records()
