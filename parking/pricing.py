@@ -1,26 +1,19 @@
-"""Pure fee calculation functions."""
+"""Fee calculation for the parking system."""
 
-import math
+from __future__ import annotations
+
 from datetime import timedelta
 
-from .models import VehicleType
+
+HOURLY_RATE = 50.0
 
 
-RATES: dict[VehicleType, tuple[float, float]] = {
-    VehicleType.MOTORCYCLE: (200.0, 100.0),
-    VehicleType.CAR: (500.0, 200.0),
-    VehicleType.TRUCK: (1000.0, 400.0),
-}
-
-
-def calculate_fee(
-    duration: timedelta,
-    vehicle_type: VehicleType,
-    rates: dict[VehicleType, tuple[float, float]] | None = None,
-) -> float:
-    """Charge a flat first hour, then a rate for each started extra hour."""
-    if duration.total_seconds() < 0:
+def calculate_fee(duration: timedelta | float) -> float:
+    """Return the parking fee using the fixed KSh 50 per hour rate."""
+    if isinstance(duration, timedelta):
+        seconds = duration.total_seconds()
+    else:
+        seconds = float(duration)
+    if seconds < 0:
         raise ValueError("Parking duration cannot be negative")
-    first_hour_rate, hourly_rate = (rates or RATES)[vehicle_type]
-    extra_hours = max(0, math.ceil((duration.total_seconds() - 3600) / 3600))
-    return round(first_hour_rate + extra_hours * hourly_rate, 2)
+    return round((seconds / 3600.0) * HOURLY_RATE, 2)

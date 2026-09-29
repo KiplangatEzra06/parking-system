@@ -1,0 +1,265 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="layout-shell">
+        <aside class="sidebar">
+            <div>
+                <div class="brand-panel">
+                    <div class="brand-mark">P</div>
+                    <div>
+                        <div class="brand-title">Parking Management</div>
+                        <div class="brand-subtitle">Parking-Management-System</div>
+                    </div>
+                </div>
+
+                <nav class="side-nav" aria-label="Sidebar navigation">
+                    <a href="#dashboard" class="nav-item active">
+                        <span class="icon">⌂</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#live-parking" class="nav-item">
+                        <span class="icon">◧</span>
+                        <span>Live Parking</span>
+                    </a>
+                    <a href="#vehicle-forms" class="nav-item">
+                        <span class="icon">☑</span>
+                        <span>Entries</span>
+                    </a>
+                    <a href="#revenue" class="nav-item">
+                        <span class="icon">◫</span>
+                        <span>Revenue</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+                <div>
+                    <div class="status-label">System Online</div>
+                    <small>All systems operational</small>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-panel" id="dashboard">
+            <header class="dashboard-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Good evening, Admin. Here's what's happening at the parking facility.</p>
+                </div>
+
+                <div class="header-meta">
+                    <div class="notification-bell">🔔</div>
+
+                    <div class="admin-box">
+                        <span class="admin-avatar">AD</span>
+                        <div>
+                            <strong>Admin</strong>
+                            <small>System Administrator</small>
+                        </div>
+                    </div>
+
+                    <div class="date-box">
+                        <small>Tue, 24 Jun 2025</small>
+                        <strong>18:42</strong>
+                    </div>
+                </div>
+            </header>
+
+            {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+            {% endif %}
+
+            {% if message %}
+            <div class="alert alert-success">{{ message }}</div>
+            {% endif %}
+
+            <div class="availability-summary">Available spaces: {{ available_slots }} / {{ total_slots }}</div>
+
+            <section class="stats-grid">
+                <article class="stat-card blue">
+                    <div class="stat-icon">🚗</div>
+                    <div class="stat-value-block">
+                        <h3>Total Bays</h3>
+                        <strong>{{ total_slots }}</strong>
+                        <small>Across all zones</small>
+                    </div>
+                </article>
+
+                <article class="stat-card green">
+                    <div class="stat-icon">🚘</div>
+                    <div class="stat-value-block">
+                        <h3>Available</h3>
+                        <strong>{{ available_slots }}</strong>
+                        <small>{{ '%.0f' % availability_percent }}% free</small>
+                    </div>
+                </article>
+
+                <article class="stat-card red">
+                    <div class="stat-icon">🚕</div>
+                    <div class="stat-value-block">
+                        <h3>Occupied</h3>
+                        <strong>{{ occupied_slots }}</strong>
+                        <small>{{ occupied_slots }} in use</small>
+                    </div>
+                </article>
+
+                <article class="stat-card purple" id="revenue">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value-block">
+                        <h3>Today's Revenue</h3>
+                        <strong>KSh {{ '%.0f' % payments_collected_today }}</strong>
+                        <small>↑ 12% vs. yesterday</small>
+                    </div>
+                </article>
+            </section>
+
+            <section class="main-grid">
+                <div class="card-panel parking-panel" id="live-parking">
+                    <div class="panel-row">
+                        <h2>Live Parking View</h2>
+                        <div class="filter-box">All Zones</div>
+                    </div>
+
+                    <div class="lot-map">
+                        <div class="zone zone-a">Zone A</div>
+                        <div class="zone zone-b">Zone B</div>
+                        <div class="zone zone-c">Zone C</div>
+                        <div class="zone zone-d">Zone D</div>
+
+                        {% set zone_slots = [slots[:6], slots[6:12], slots[12:18], slots[18:24]] %}
+                        {% for zone in zone_slots %}
+                        <div class="bay-grid">
+                            {% for slot in zone %}
+                            <div class="bay {{ 'bay-open' if slot.status == 'Available' else 'bay-taken' }}">
+                                {{ slot.slot_id }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="entry-exit">ENTRY / EXIT</div>
+                    </div>
+                </div>
+
+                <aside class="right-stack">
+                    <div class="card-panel activity-panel">
+                        <div class="panel-row compact">
+                            <h3>Live Parking Activity</h3>
+                            <span class="live-pill">● Real-time</span>
+                        </div>
+
+                        <ul class="activity-list">
+                            {% if recent_activity %}
+                            {% for item in recent_activity %}
+                            <li class="activity-item">
+                                <span class="activity-icon">{{ '🚗' if item.kind == 'entry' else '💳' }}</span>
+                                <div>
+                                    <div>{{ item.label }}</div>
+                                    <small>{{ '18:32' if item.kind == 'entry' else '18:21' }}</small>
+                                </div>
+                            </li>
+                            {% endfor %}
+                            {% else %}
+                            <li class="activity-item empty">No recent activity yet.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+
+                </aside>
+            </section>
+
+            <section class="forms-row" id="vehicle-forms">
+                <div class="card-panel form-panel">
+                    <h3>Vehicle Entry</h3>
+                    <form method="post">
+                        <input type="hidden" name="action" value="entry">
+                        <label for="entry_number">Registration number</label>
+                        <input id="entry_number" type="text" name="registration_number" placeholder="ABC 123 A"
+                            pattern="[A-Z]{3} [0-9]{3} [A-Z]" title="Use ABC 123 A format" maxlength="9" required>
+                        <button type="submit" class="primary">Enter vehicle</button>
+                    </form>
+                </div>
+
+                <div class="card-panel form-panel">
+                    <h3>Vehicle Exit</h3>
+                    <form method="post">
+                        <input type="hidden" name="action" value="exit">
+                        <label for="exit_number">Registration number</label>
+                        <input id="exit_number" type="text" name="registration_number" placeholder="ABC 123 A"
+                            pattern="[A-Z]{3} [0-9]{3} [A-Z]" title="Use ABC 123 A format" maxlength="9" required>
+                        <button type="submit" class="secondary">Exit vehicle</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="card-panel table-panel">
+                <div class="panel-row compact">
+                    <h2>Recent Activity</h2>
+                    <a href="#">View All →</a>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Plate Number</th>
+                            <th>Zone</th>
+                            <th>Bay</th>
+                            <th>Entry Time</th>
+                            <th>Duration</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if active_records %}
+                        {% for record in active_records[:5] %}
+                        <tr>
+                            <td>{{ record.display_plate }}</td>
+                            <td>{{ 'A' if record.slot_no <= 6 else 'B' if record.slot_no <=12 else 'C' if record.slot_no
+                                    <=18 else 'D' }}</td>
+                            <td>{{ record.bay_label }}</td>
+                            <td>{{ record.entry_time }}</td>
+                            <td>1h 10m</td>
+                            <td>KSh 150</td>
+                            <td><span class="status-tag parked">Parked</span></td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-state">No active parking records are available.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('input[name="registration_number"]').forEach(function (input) {
+            input.addEventListener('input', function () {
+                const cleaned = (this.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                let formatted = cleaned.slice(0, 3);
+                if (cleaned.length > 3) {
+                    formatted += ' ' + cleaned.slice(3, 6);
+                }
+                if (cleaned.length > 6) {
+                    formatted += ' ' + cleaned.slice(6, 7);
+                }
+                this.value = formatted.slice(0, 9);
+            });
+        });
+    </script>
+</body>
+
+</html>
